@@ -17,7 +17,7 @@
 
 ## Workflow
 Below is an image that illustrates the workflow of the Workplace-Assistant-Chatbot, showing how queries are processed, tools are selected, and responses are generated:
-![Workflow Diagram](path/to/your/image.png)
+![Workflow Diagram](Workflow.png)
 
 
 ## Working
