@@ -1,0 +1,28 @@
+# Workplace Assistant Chatbot - Requirements
+
+# Core LangChain packages
+langchain-core>=0.2.0
+langchain-text-splitters>=0.2.0
+langchain-community>=0.2.0
+
+# GROQ API integration
+langchain-groq>=0.1.0
+
+# HuggingFace for embeddings
+langchain-huggingface>=0.0.3
+sentence-transformers>=2.6.0
+
+# Vector database
+chromadb>=0.4.0
+
+# PDF processing
+pypdf>=3.0.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Data processing
+numpy>=1.24.0
+
+# Optional: For better performance
+torch>=2.0.0

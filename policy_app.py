@@ -1,8 +1,17 @@
 import argparse
+import os
+from dotenv import load_dotenv
 from langchain_community.vectorstores.chroma import Chroma
-from langchain.prompts import ChatPromptTemplate
-from langchain_community.llms import Ollama
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEmbeddings
+
+# Load environment variables
+load_dotenv()
+
+# Get GROQ configuration
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "mixtral-8x7b-32768")
 
 
 # from get_embedding_function import get_embedding_function
@@ -29,7 +38,10 @@ def main():
 
 
 def get_embedding_function():
-    embeddings = OllamaEmbeddings(model = "nomic-embed-text")
+    """Get HuggingFace embeddings for vector store."""
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
     return embeddings
 
 def query_rag(query_text: str):
@@ -44,8 +56,16 @@ def query_rag(query_text: str):
     prompt = prompt_template.format(context=context_text, question=query_text)
     # print(prompt)
 
-    model = Ollama(model="llama2")
-    response_text = model.invoke(prompt)
+    # Initialize GROQ model
+    model = ChatGroq(
+        groq_api_key=GROQ_API_KEY,
+        model_name=GROQ_MODEL,
+        temperature=0.7,
+        max_tokens=512
+    )
+    
+    response = model.invoke(prompt)
+    response_text = response.content if hasattr(response, 'content') else str(response)
 
     sources = [doc.metadata.get("id", None) for doc, _score in results]
     formatted_response = f"Response: {response_text}\nSources: {sources}"

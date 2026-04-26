@@ -1,6 +1,15 @@
 import json
 import argparse
-from langchain_community.llms import Ollama
+import os
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+
+# Load environment variables
+load_dotenv()
+
+# Get GROQ configuration
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "mixtral-8x7b-32768")
 
 
 
@@ -77,13 +86,17 @@ args = parser.parse_args()
 
 prompt = f"Here is the data: {flat_json_string}. Respond to the user's query in the second person, addressing the user as 'you'. Do not use phrases like 'according to the json data provided'. The employee cannot take a leave if the number of the remaining leave is 0. Answer the question in 1 sentence. Now, answer the following query: {args.prompt}."
 
-
-# Initialize the Ollama LLaMA2 model
-llm = Ollama(model="llama2")
+# Initialize the GROQ LLM
+llm = ChatGroq(
+    groq_api_key=GROQ_API_KEY,
+    model_name=GROQ_MODEL,
+    temperature=0.7,
+    max_tokens=128
+)
 
 # Generate the response
-response = llm.generate(prompts=[prompt], max_tokens=50)
+response = llm.invoke(prompt)
 
-# Assuming the response object has a method or attribute to get the generated text
-generated_text = response.generations[0][0].text  # Adjust based on actual response structure
+# Extract the generated text
+generated_text = response.content if hasattr(response, 'content') else str(response)
 print(generated_text)

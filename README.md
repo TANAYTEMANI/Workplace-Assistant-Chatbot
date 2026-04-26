@@ -1,35 +1,140 @@
-# Workplace-Assistant-Chatbot
-**Workplace-Assistant-Chatbot** is an AI-powered chatbot designed to provide quick and accurate responses to employee-related queries within an organization. Leveraging state-of-the-art technologies like LangChain for Retrieval-Augmented Generation (RAG), Pinecone for efficient vector search, and the Mistral model as an LLM, this chatbot helps employees access information about HR policies and personal details effortlessly.
+# Workplace Assistant Chatbot
 
-## Features
-- **HR Policy Querying**: Leverages Pinecone to store and retrieve vector embeddings of HR policy documents, ensuring accurate and relevant responses.
-- **Employee Details Lookup**: Uses a custom LangChain tool to fetch employee-related information from a structured JSON dataset.
-- **Intelligent Tool Selection**: Employs LangChain agents to determine the most appropriate tool based on the query, ensuring the right information is retrieved efficiently.
+A chatbot application for workplace assistance using GROQ API for LLM functionality, with support for:
+- JSON-based employee data queries
+- Policy document search using RAG (Retrieval Augmented Generation)
+- Vector database for efficient document retrieval
 
-  ## Tech Stack
-- **LangChain RAG Approach:** Enhances the chatbot’s ability to generate responses by combining retrieval from a knowledge base with generative LLM capabilities.
-- **Pinecone:** Used for storing vector embeddings of HR policies, allowing for fast and relevant document retrieval.
-- **Model:** The LLM model from Hugging Face, specifically the `mistralai/Mistral-7B-Instruct-v0.2`, powers the chatbot's natural language understanding and generation.
-- **LangChain Tools:** 
-  - `PolicyTool`: Retrieves answers based on HR policies stored in PDF format.
-  - `JsonTool`: Fetches information from a JSON file containing detailed employee data.
-- **LangChain Agents:** Dynamically select the appropriate tool based on the nature of the query.
+## 🚀 Quick Start
 
-## Workflow
-Below is an image that illustrates the workflow of the Workplace-Assistant-Chatbot, showing how queries are processed, tools are selected, and responses are generated:
-![Workflow Diagram](Workflow.png)
+### 1. Install Dependencies
 
+```bash
+cd /Users/tanayagarwal/Documents/Workplace-Assistant-Chatbot
+pip install -r requirements.txt
+```
 
-## Working
-1. **Ask a question:** 
-    - For HR policies: "What is the company's leave policy?"
-    - For employee details: "Who is the manager of the sales department?"
+### 2. Set Up Environment Variables
 
-2. **How it works:**
-    - The chatbot analyzes the query and uses LangChain agents to decide whether to fetch information from the HR policies or the employee details JSON file.
-    - It then retrieves the relevant information and generates a response using the model by aligning itself with the system prompt created.
+Create a `.env` file from the template:
 
-## Acknowledgments
-- [LangChain](https://github.com/hwchase17/langchain) for providing the framework.
-- [Pinecone](https://www.pinecone.io/) for the vector database.
-- [Hugging Face](https://huggingface.co/) for the Mistral model.
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and add your API keys:
+```
+GROQ_API_KEY=your_actual_groq_api_key_here
+OPENWEATHER_API_KEY=your_actual_openweather_api_key_here
+GROQ_MODEL=mixtral-8x7b-32768
+```
+
+### 3. Initialize the Database (First Time Only)
+
+```bash
+python create_database.py --reset
+```
+
+This will:
+- Load PDF documents from the `pdf_data` directory
+- Create embeddings using HuggingFace
+- Store them in a Chroma vector database
+
+## 📖 Usage
+
+### Combined Chatbot
+
+Run the main chatbot application:
+
+```bash
+python combined_chatbot.py
+```
+
+This demonstrates both JSON queries and policy document searches.
+
+### JSON Query App
+
+Query employee data from JSON:
+
+```bash
+python json_app.py "who is my manager?"
+python json_app.py "how many leave days do I have remaining?"
+```
+
+### Policy Query App
+
+Search policy documents:
+
+```bash
+python policy_app.py "what is the marriage gift policy?"
+python policy_app.py "how many days of privilege leave can I take?"
+```
+
+## 🔧 Configuration
+
+### GROQ Models
+
+Available models (configure in `.env`):
+- `mixtral-8x7b-32768` (default) - Good balance of speed and quality
+- `llama2-70b-4096` - Higher quality, slower
+- `gemma-7b-it` - Faster, smaller model
+- `llama3-70b-8192` - Latest model with larger context
+
+### Embeddings
+
+Currently using HuggingFace's `sentence-transformers/all-MiniLM-L6-v2` for embeddings. This runs locally and doesn't require any additional API keys.
+
+## 📁 Project Structure
+
+```
+├── combined_chatbot.py      # Main chatbot application (converted from notebook)
+├── create_database.py        # Vector database initialization
+├── json_app.py              # JSON query application
+├── policy_app.py            # Policy document search application
+├── requirements.txt          # Python dependencies
+├── .env.example             # Environment variables template
+├── .env                     # Your actual API keys (gitignored)
+├── leavesEmployee.json      # Employee data
+├── pdf_data/                # Policy documents (PDFs)
+└── chroma/                  # Vector database storage
+```
+
+## 🔄 Migration from Ollama/Azure OpenAI
+
+This project has been migrated from using Ollama and Azure OpenAI to GROQ API:
+
+### Changes Made:
+- ✅ Replaced `Ollama` LLM with `ChatGroq`
+- ✅ Replaced `OllamaEmbeddings` with `HuggingFaceEmbeddings`
+- ✅ Fixed deprecated imports:
+  - `langchain.text_splitter` → `langchain_text_splitters`
+  - `langchain.prompts` → `langchain_core.prompts`
+- ✅ Converted Jupyter notebook to Python script
+- ✅ Added environment variable support with `python-dotenv`
+
+## 🐛 Troubleshooting
+
+### "Module not found" errors
+Make sure you've installed all dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### "API key not found" errors
+Ensure your `.env` file exists and contains valid API keys.
+
+### Slow embedding generation (first run)
+The first time you run the code, HuggingFace will download the embedding model (~80MB). Subsequent runs will be faster.
+
+### Vector database errors
+If you encounter database errors, try resetting it:
+```bash
+python create_database.py --reset
+```
+
+## 📝 Notes
+
+- The original Jupyter notebook `combined-chatbot.ipynb` is preserved for reference
+- All imports have been updated to use the latest langchain packages
+- GROQ API provides faster inference compared to local Ollama models
+- HuggingFace embeddings run locally with no API costs

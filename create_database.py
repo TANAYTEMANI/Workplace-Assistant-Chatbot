@@ -1,12 +1,15 @@
 import argparse
 import os
 import shutil
+from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFDirectoryLoader
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_text_splitters import CharacterTextSplitter
 from langchain.docstore.document import Document
-# from get_embedding_function import get_embedding_function
 from langchain_community.vectorstores.chroma import Chroma
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
+
+# Load environment variables
+load_dotenv()
 
 
 
@@ -31,7 +34,10 @@ def main():
 
 
 def get_embedding_function():
-    embeddings = OllamaEmbeddings(model = "nomic-embed-text")
+    """Get HuggingFace embeddings for vector store."""
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
     return embeddings
 
 def load_documents():
@@ -98,7 +104,10 @@ def calculate_chunk_ids(chunks):
             current_chunk_index = 0
 
         # Calculate the chunk ID.
-        chunk_id = f"{current_page_id}:{current_chunk_index}"
+        # NOTE: (intentional regression for testing)
+        # This drops the chunk index, which causes all chunks from the same page
+        # to share an identical ID and overwrite each other in Chroma.
+        chunk_id = f"{current_page_id}"
         last_page_id = current_page_id
 
         # Add it to the page meta-data.
